@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------------------------
-# Tony's Massive Makefile.
+# MakeDown
 # tony@thompson.name
 #
 # v 1.0 Initial Release
@@ -11,7 +11,7 @@
 # This is a non-recursive build system; only one instance of make is needed.
 # The main advantage of this approach is that dependancy information is
 # constant throughout the entire tree; this can lead to a substantial reduction
-# in compie times.  Also, there are fewer spawned processes.  The disadvantage
+# in compile times.  Also, there are fewer spawned processes.  The disadvantage
 # is that all make instantiations must be done from the root of the tree, i.e.:
 # from this make file, not from any of the child makefiles.
 # 
@@ -32,13 +32,13 @@
 # Global Variables
 
 # List of all targets.  These will be built by 'make all', and deleted by 'make distclean'.
-TARGETS :=
+TARGETS := readme.html readme.pdf
 
 # List of files to clean with 'make clean'
-CLEAN := 
+CLEAN := readme.log readme.aux readme.tex
 
 # Set any global options here.
-DOT_OPT	:= -Gfontname=Futura -Nfontname=Futura -Efontname=Futura
+DOT_OPT	:= 
 
 # Here to make it the first target.
 # Reset at the bottom of this file.
@@ -82,7 +82,7 @@ distclean:
 # File Converters for LaTeX
 
 %.tex: %.mdwn
-	 sed -e 's/\(cite:\)\([a-z0-9,]*\)/\\cite{\2}/' $< | pandoc -t latex -o $@ 
+	 sed -e 's/\(cite:\)\([a-z0-9,]*\)/\\cite{\2}/' $< | pandoc -s -t latex -o $@ 
 
 %.pdf: %.eps
 	epstopdf $< > $@
@@ -103,15 +103,17 @@ distclean:
 REFGREP := grep "^LaTeX Warning: Label(s) may have changed."
 BIBGREP := grep "^LaTeX Warning: There were undefined references."
 
-%.aux %.pdf: %.tex 
+%.aux %.pdf: %.mdwn
+	cd $(dir $*) && sed -e 's/\(cite:\)\([a-z0-9,]*\)/\\cite{\2}/' $< | pandoc -s -t latex -o $*.tex
 	cd $(dir $*) && pdflatex $(notdir $*)
 	cd $(dir $*) && (if $(BIBGREP) $(notdir $*.log); then bibtex $(notdir $*); pdflatex $(notdir $*); fi)
 	cd $(dir $*) && (if $(BIBGREP) $(notdir $*.log); then pdflatex $(notdir $*); fi)
 	cd $(dir $*) && (while $(REFGREP) $(notdir $*.log); do pdflatex $(notdir $*); done)
 
 
+
 # -----------------------------------------------------------------------------------------------
-# File Convertors for HTML 
+# File Converters for HTML 
 
 %.html: %.mdwn
 	pandoc -s -S $< -o $@
@@ -125,7 +127,7 @@ BIBGREP := grep "^LaTeX Warning: There were undefined references."
 
 
 # -----------------------------------------------------------------------------------------------
-# Webserver for easy visualization.
+# Webserver for easy visualization.  Uses this directory as the root.
 
 startweb: 
 	mini-httpd -p 8080 -d . -i web.pid

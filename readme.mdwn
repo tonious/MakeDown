@@ -1,0 +1,29 @@
+% MakeDown - A Makefile for Pandoc and LaTeX
+% Tony Thompson
+% 12 June 2009
+
+This Makefile is intended to build largish PDF and HTML documents from
+markdown source.  It relies heavily on implicit rules; in most cases
+one must only specify dependancies.
+
+This is a non-recursive build system; only one instance of make is needed.
+The main advantage of this approach is that dependancy information is
+constant throughout the entire tree; this can lead to a substantial reduction
+in compile times.  Also, there are fewer spawned processes.  The disadvantage
+is that all make instantiations must be done from the root of the tree, i.e.:
+from this make file, not from any of the child makefiles.
+
+Requires:
+
+*   LaTeX
+*   BibTeX
+*   pandoc
+*   bibtex2html
+
+Good to have:
+
+*   dot (graphviz)
+*   eps2pdf
+*   ps2pdf
+*   mini-httpd for built in web preview.
+
